@@ -1,0 +1,58 @@
+.infoButton {
+  background-color: rgba(0, 0, 0, 0.61);
+  grid-area: header;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  padding-left: 0.1rem;
+  line-height: 0.2rem;
+}
+
+.infoButton:hover {
+  background-color: rgba(93, 93, 93, 0.61);
+}
+
+.infoBox {
+  position: absolute;
+  bottom: 0.8rem;
+  left: 0.8rem;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas: "header header";
+  background-color: rgba(0, 0, 0, 0.61);
+  padding: 0 0.5rem 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+}
+
+.tagsContainer {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+}
+
+.tag {
+  border-radius: 0.5rem;
+  border: 1px solid white;
+  padding: 0.2rem;
+  margin-right: 0.2rem;
+  text-align: center;
+}
+
+.icon {
+  padding: 0.4rem;
+  margin: 0;
+}
+
+.arrow {
+  padding: 0;
+  margin: 0;
+}
