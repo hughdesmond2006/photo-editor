@@ -30,56 +30,6 @@ export default function App() {
     setViewerIsOpen(false);
   };
 
-  //<button
-  // onClick={() => setBlur(blur === MAX_BLUR ? 0 : blur + 1)}
-  // >
-  //   blur+
-  // </button>
-  // <button onClick={() => setIsGreyscale(!isGreyscale)}>
-  //   greyscale+
-  // </button>
-
-  // this is called when the scroller hits the bottom
-  // each time with a new api page number
-  // const loadItems = page => {
-  //   let API_KEY = "6473511-0417f2cad683f1bee54cafe15";
-  //   let URL = `https://pixabay.com/api/?key=${API_KEY}&q=travel&image_type=photo&pretty=true&page=${page}`;
-
-  //   fetch(URL)
-  //     .then(res => res.json())
-  //     .then(
-  //       result => {
-  //         // only fetch HD quality photos when screen size is large enough
-  //         const HD = window.innerWidth > HD_IMAGE_THRESHOLD;
-
-  //         // owidth means original width, for display in Photo Details
-  //         // width/height fields are modified by the Gallery
-  //         let photoArr = result.hits.map(x => ({
-  //           id: x.id,
-  //           src: HD ? x.fullHDURL : x.webformatURL,
-  //           width: x.imageWidth,
-  //           height: x.imageHeight,
-  //           owidth: x.imageWidth,
-  //           oheight: x.imageHeight,
-  //           tags: x.tags,
-  //           views: x.views,
-  //           downloads: x.downloads,
-  //           user: x.user
-  //         }));
-
-  //         // if no more data (reached the last page)
-  //         if (photoArr.length === 0) {
-  //           setHasMoreData(false);
-  //         } else {
-  //           setPhotos([...photos, ...photoArr]);
-  //         }
-  //       },
-  //       error => {
-  //         setFetchError(error);
-  //       }
-  //     );
-  // };
-
   const loadItems = (page) => {
     let URL = `https://picsum.photos/v2/list?page=${page}`;
 
@@ -87,8 +37,6 @@ export default function App() {
       .then((res) => res.json())
       .then(
         (result) => {
-          console.log(result);
-
           // owidth means original width, for display in Photo Details
           // width/height fields are modified by the Gallery
           let photoArr = result.map((x) => ({
@@ -125,6 +73,7 @@ export default function App() {
         </p>
       ) : (
         <InfiniteScroll
+          style={{background: 'white'}}
           data-testid={"infiniteScroll"}
           pageStart={1}
           loadMore={loadItems}

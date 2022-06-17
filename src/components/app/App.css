@@ -1,3 +1,21 @@
+html {
+  background-color: #57597c;
+  opacity: 1;
+  background-image: linear-gradient(
+      #676983 0.7000000000000001px,
+      transparent 0.7000000000000001px
+    ),
+    linear-gradient(
+      to right,
+      #676983 0.7000000000000001px,
+      #57597c 0.7000000000000001px
+    );
+  background-size: 14px 14px;
+  height: 100vh;
+  width: 100vw;
+  color: gray;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Arial, "Segoe UI", "Roboto",
@@ -5,7 +23,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: white;
+  color: white;  
 }
 
 code {

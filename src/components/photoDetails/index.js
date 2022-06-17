@@ -1,22 +1,12 @@
 import React, { useState } from "react";
-import {
-  IoMdDownload,
-  IoMdResize,
-  IoIosArrowDown,
-  IoIosArrowUp,
-} from "react-icons/io";
-import { FaEye, FaUserCircle, FaTags } from "react-icons/fa";
+import { IoMdResize, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import { FaUserCircle } from "react-icons/fa";
 import ReactTooltip from "react-tooltip";
 import "./PhotoDetails.css";
 import { useNavigate } from "react-router-dom";
 
-// custom expandable view to show photo details in single photo mode
-// -----------------------------------------------------------------
-// expanded/collapsed state persists while swiping through photos
-// icons with tooltips used for minimal design
-// rem sizing for different displays
 const PhotoDetails = (props) => {
-  const [isExpanded, setExpanded] = useState(false);
+  const [isExpanded, setExpanded] = useState(true);
   const { currentView } = props;
 
   let navigate = useNavigate();
@@ -55,25 +45,6 @@ const PhotoDetails = (props) => {
               <p className={"infoItem"} data-testid={"photoSize"}>
                 {currentView.owidth} x {currentView.oheight}
               </p>
-              <IoMdDownload
-                className={"icon"}
-                data-testid={"iconDownloads"}
-                size={"1rem"}
-                data-tip="Downloads"
-              />
-              <p className={"infoItem"} data-testid={"downloads"}>
-                {currentView.downloads.toLocaleString()}
-              </p>
-              <FaEye
-                className={"icon"}
-                data-testid={"iconViews"}
-                size={"1rem"}
-                data-tip="Views"
-              />
-
-              {/* <p className={"infoItem"} data-testid={"views"}>
-                {currentView.views.toLocaleString()}
-              </p> */}
               <FaUserCircle
                 className={"icon"}
                 data-testid={"iconUser"}
@@ -86,37 +57,28 @@ const PhotoDetails = (props) => {
               <ReactTooltip />
             </>
           )}
-          <FaTags
-            className={"icon"}
-            data-testid={"iconTags"}
-            size={"1rem"}
-            data-tip="Tags"
-          />
-          <div
-            className={"infoItem tagsContainer"}
-            data-testid={"tagsContainer"}
+          <div />
+          <button
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              width: "100px",
+              marginTop: "8px",
+            }}
+            onClick={() => {
+              // clear local storage after last edit..
+              localStorage.removeItem("size");
+              localStorage.removeItem("pos");
+              localStorage.removeItem("blur");
+              localStorage.removeItem("grayscale");
+
+              navigate(
+                `edit/${currentView.id}/${currentView.owidth}/${currentView.oheight}`
+              );
+            }}
           >
-            <button
-              onClick={() => {
-                navigate(
-                  `edit/${currentView.id}/${currentView.owidth}/${currentView.oheight}`,
-                  { replace: true }
-                );
-              }}
-            >
-              edit
-            </button>
-            |
-            {currentView.tags &&
-              currentView.tags.split(",").map((tag, index) => {
-                return (
-                  <div className={"tag"} data-testid={"tag"} key={index}>
-                    {tag}
-                  </div>
-                );
-              })}
-          </div>
-          <ReactTooltip />
+            edit
+          </button>
         </div>
       </div>
     </div>

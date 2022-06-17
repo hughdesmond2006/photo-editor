@@ -1,1 +1,4 @@
-Infinite scrolling photo gallery with hooks and minimalist responsive design
+Infinite scrolling photo gallery with editor
+
+To run:
+yarn start

@@ -1,13 +1,13 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import "./Editor.css";
 import { Rnd } from "react-rnd";
 import styled from "styled-components";
+import { saveAs } from "file-saver";
 
 const MAX_BLUR = 10;
-const MAX_SCALE = 1;
-const MIN_SCALE = 0.1;
 const DEFAULT_WIDTH = 600;
+const DEFAULT_X = 60;
+const DEFAULT_Y = 60;
 
 export default function App() {
   let params = useParams();
@@ -20,37 +20,32 @@ export default function App() {
     ? true
     : false;
 
-  console.log("saved", savedSize, savedPos, savedBlur, savedGrayscale);
-
   const [fetchError, setFetchError] = useState(null);
   const [url, setURL] = useState([]);
   const [blur, setBlur] = useState(savedBlur || 0);
   const [isGrayscale, setIsGreyscale] = useState(
     savedGrayscale ? savedGrayscale : false
   );
-  const [pos, setPos] = useState(savedPos || { x: 100, y: 100 });
+  const [pos, setPos] = useState(savedPos || { x: DEFAULT_X, y: DEFAULT_Y });
   const [size, setSize] = useState(
     savedSize || {
       w: DEFAULT_WIDTH,
       h: Math.round(DEFAULT_WIDTH * aspectRatio),
     }
   );
-  const [scale, setScale] = useState(1);
-
-  console.log("state", size, scale, blur, isGrayscale);
+  const [displaySize, setDisplaySize] = useState(size);
 
   useEffect(() => {
-    load();
+    load(size);
   }, []);
 
   useEffect(() => {
+    setDisplaySize(size);
     localStorage.setItem("size", JSON.stringify(size));
-    load(size);
   }, [size]);
 
   useEffect(() => {
     localStorage.setItem("pos", JSON.stringify(pos));
-    load(size);
   }, [pos]);
 
   useEffect(() => {
@@ -63,7 +58,7 @@ export default function App() {
     load(size);
   }, [isGrayscale]);
 
-  const load = (size) => {
+  const load = async (size) => {
     let URL = `https://picsum.photos/id/${params.id}/${
       size ? size.w : params.width
     }/${size ? size.h : params.height}?${isGrayscale ? "grayscale&" : ""}${
@@ -74,8 +69,6 @@ export default function App() {
       .then((res) => res.url)
       .then(
         (result) => {
-          console.log(result);
-
           setURL(result);
         },
         (error) => {
@@ -85,36 +78,105 @@ export default function App() {
   };
 
   const download = () => {
-    let URL = `https://picsum.photos/id/${params.id}/info`;
+    saveAs(
+      url,
+      `${params.id}_${size.w}x${size.h}${isGrayscale ? "_grayscale" : ""}${
+        blur ? `_blur${blur}` : ""
+      }.jpg`
+    );
+  };
 
-    fetch(URL)
-      .then((res) => res)
-      .then(
-        (result) => {
-          console.log("info", result);
+  const setOriginalSize = () => {
+    const oSize = {
+      w: params.width,
+      h: params.height,
+    };
+    setSize(oSize);
+    setPos({
+      x: DEFAULT_X,
+      y: DEFAULT_Y,
+    });
+    load(oSize);
+  };
 
-          setURL(result);
-        },
-        (error) => {
-          setFetchError(error);
-        }
-      );
+  const setDefaultSize = () => {
+    const dSize = {
+      w: DEFAULT_WIDTH,
+      h: Math.round(DEFAULT_WIDTH * aspectRatio),
+    };
+    setSize(dSize);
+    setPos({
+      x: DEFAULT_X,
+      y: DEFAULT_Y,
+    });
+    load(dSize);
+  };
+
+  const onResizeStop = (e, direction, ref, delta, position) => {
+    const w = parseInt(ref.style.width.replace("px", ""));
+    const h = parseInt(ref.style.height.replace("px", ""));
+    setSize({ w, h });
+    setPos({ ...position });
+    load({ w, h });
+  };
+
+  const onResize = (e, direction, ref, delta, position) => {
+    setDisplaySize({
+      w: parseInt(ref.style.width.replace("px", "")),
+      h: parseInt(ref.style.height.replace("px", "")),
+    });
   };
 
   return (
-    <s.container>
-      {fetchError ? (
-        <p className={"fetchError"} data-testid={"fetchError"}>
-          Failed to fetch photos, please try again later...
-        </p>
-      ) : (
-        <>
-          <div>EDITOR!!! for id: {params.id}</div>
-          <div style={{ color: "red" }}>
-            {size.w} x {size.h}
+    <>
+      <s.controls>
+        <div>
+          <button
+            disabled={fetchError}
+            style={{ margin: "4px" }}
+            onClick={setOriginalSize}
+          >
+            original size
+          </button>
+          <button
+            disabled={fetchError}
+            style={{ margin: "4px" }}
+            onClick={setDefaultSize}
+          >
+            reset to default
+          </button>
+          <div
+            style={{
+              display: "inline-block",
+              marginLeft: "16px",
+              marginRight: "16px",
+            }}
+          >
+            {displaySize.w} x {displaySize.h} pixels
           </div>
-        </>
-      )}
+          <button
+            disabled={fetchError}
+            style={{ margin: "4px" }}
+            onClick={() => setBlur(blur === MAX_BLUR ? 0 : blur + 1)}
+          >
+            blur {blur}
+          </button>
+          <button
+            disabled={fetchError}
+            style={{ margin: "4px" }}
+            onClick={() => setIsGreyscale(!isGrayscale)}
+          >
+            {isGrayscale ? "to colour" : "to grayscale"}
+          </button>
+          <button
+            disabled={fetchError}
+            style={{ margin: "4px" }}
+            onClick={download}
+          >
+            download
+          </button>
+        </div>
+      </s.controls>
       <Rnd
         style={{
           display: "flex",
@@ -124,46 +186,20 @@ export default function App() {
         size={{ width: size.w, height: size.h }}
         position={{ x: pos.x, y: pos.y }}
         onDragStop={(e, d) => setPos({ x: d.x, y: d.y })}
-        onResizeStop={(e, direction, ref, delta, position) => {
-          setSize({
-            w: parseInt(ref.style.width.replace("px", "")),
-            h: parseInt(ref.style.height.replace("px", "")),
-          });
-          setPos({
-            ...position,
-          });
-        }}
-        //scale={scale}
+        onResizeStop={onResizeStop}
+        onResize={onResize}
         lockAspectRatio
       >
-        <s.photo style={{ backgroundImage: `url(${url})` }} />
+        {fetchError ? (
+          <s.errMsg>Failed to fetch photo, please try again later...</s.errMsg>
+        ) : (
+          <>
+            <s.spinner />
+            <s.photo style={{ backgroundImage: `url(${url})` }} />
+          </>
+        )}
       </Rnd>
-
-      {/* <button onMouseDown={resizeHandler}>resize</button> */}
-      <button onClick={() => setBlur(blur === MAX_BLUR ? 0 : blur + 1)}>
-        blur+
-      </button>
-      <button onClick={() => setIsGreyscale(!isGrayscale)}>grayscale+</button>
-      <button onClick={download}>Click to download</button>
-      <button
-        onClick={() => {
-          if (scale !== MAX_SCALE) {
-            setScale(scale + 0.1);
-          }
-        }}
-      >
-        +
-      </button>
-      <button
-        onClick={() => {
-          if (scale !== MIN_SCALE) {
-            setScale(scale - 0.1);
-          }
-        }}
-      >
-        -
-      </button>
-    </s.container>
+    </>
   );
 }
 
@@ -176,22 +212,32 @@ const s = {
     width: 100%;
     background-size: cover;
   `,
-  container: styled.div`
-    overflow: hidden;
-    background-color: #57597c;
-    opacity: 1;
-    background-image: linear-gradient(
-        #676983 0.7000000000000001px,
-        transparent 0.7000000000000001px
-      ),
-      linear-gradient(
-        to right,
-        #676983 0.7000000000000001px,
-        #57597c 0.7000000000000001px
-      );
-    background-size: 14px 14px;
-    height: 100vh;
-    width: 100vw;
-    color: gray;
+  spinner: styled.div`
+    background-image: url("https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif");
+    width: 50px;
+    height: 50px;
+    background-size: contain;
+  `,
+  errMsg: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: lightgray;
+    width: 100%;
+    height: 100%;
+    font-size: 1.5rem;
+    text-align: center;
+    color: darkred;
+    padding: 1rem;
+  `,
+  controls: styled.div`
+    background: rgb(0 0 0 / 46%);
+    position: fixed;
+    width: 100%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
   `,
 };
